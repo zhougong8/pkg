@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>央视频 TV</title>
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; }
+  html,body { height:100%; background:#0b0e14; color:#fff;
+    font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif; overflow-x:hidden; }
+  #app { padding: 36px 56px 56px; }
+  header { display:flex; align-items:baseline; justify-content:space-between;
+    margin-bottom:26px; flex-wrap:wrap; }
+  h1 { font-size:46px; font-weight:800; letter-spacing:2px; }
+  h1 .accent { color:#e60012; }
+  .hint { font-size:23px; color:#9aa4b2; }
+  .section-title { font-size:29px; color:#c8d0dc; margin:28px 0 14px; font-weight:700; }
+  .grid { display:flex; flex-wrap:wrap; gap:18px; }
+  .card {
+    width:196px; height:118px; border-radius:14px;
+    background:linear-gradient(135deg,#1b2230,#232c3d);
+    border:2px solid #2c3647; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; cursor:pointer;
+    transition:transform .12s, border-color .12s, background .12s;
+  }
+  .card .num { font-size:33px; font-weight:800; }
+  .card .name { font-size:19px; color:#aeb8c7; margin-top:6px; }
+  .card.ysp { background:linear-gradient(135deg,#7a0c14,#b3121f); border-color:#e60012; width:250px; }
+  .card.ysp .name { color:#ffd9dd; }
+  .card:focus, .card.focused {
+    outline:none; border-color:#ffd000; background:linear-gradient(135deg,#2a3650,#37486b);
+    transform:scale(1.08); box-shadow:0 0 0 4px rgba(255,208,0,.35);
+  }
+  .card.ysp:focus, .card.ysp.focused { background:linear-gradient(135deg,#9c1018,#e60012); }
+  footer { margin-top:38px; font-size:19px; color:#6b7484; line-height:1.7; max-width:1100px; }
+  .badge { display:inline-block; background:#e60012; color:#fff; border-radius:6px;
+    padding:2px 9px; font-size:15px; margin-left:8px; vertical-align:middle; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>央<span class="accent">视频</span> TV <span class="badge">轻量版</span></h1>
+    <div class="hint">方向键选择 · OK/确认 播放 · 返回键 回到首页</div>
+  </header>
+
+  <div class="section-title">CCTV 直播频道</div>
+  <div class="grid" id="liveGrid"></div>
+
+  <div class="section-title">央视频 / 新闻</div>
+  <div class="grid" id="yspGrid"></div>
+
+  <footer>
+    说明：本页面以官方网页播放器（央视网 / 央视频）封装，节目版权归中央广播电视总台所有，仅供个人观看。<br>
+    可直接用「电视浏览器」(如 TV Bro) 打开本页并设为首页；若老盒子网页无法播放直播（个别老旧 WebView 不支持 HLS），建议安装官方「央视频TV版」App。
+  </footer>
+</div>
+<script>
+  var live = [
+    {n:'CCTV-1',  t:'综合',     u:'https://tv.cctv.com/live/cctv1/'},
+    {n:'CCTV-2',  t:'财经',     u:'https://tv.cctv.com/live/cctv2/'},
+    {n:'CCTV-3',  t:'综艺',     u:'https://tv.cctv.com/live/cctv3/'},
+    {n:'CCTV-4',  t:'中文国际', u:'https://tv.cctv.com/live/cctv4/'},
+    {n:'CCTV-5',  t:'体育',     u:'https://tv.cctv.com/live/cctv5/'},
+    {n:'CCTV-5+', t:'体育赛事', u:'https://tv.cctv.com/live/cctv5plus/'},
+    {n:'CCTV-6',  t:'电影',     u:'https://tv.cctv.com/live/cctv6/'},
+    {n:'CCTV-7',  t:'国防军事', u:'https://tv.cctv.com/live/cctv7/'},
+    {n:'CCTV-8',  t:'电视剧',   u:'https://tv.cctv.com/live/cctv8/'},
+    {n:'CCTV-9',  t:'纪录',     u:'https://tv.cctv.com/live/cctv9/'},
+    {n:'CCTV-10', t:'科教',     u:'https://tv.cctv.com/live/cctv10/'},
+    {n:'CCTV-11', t:'戏曲',     u:'https://tv.cctv.com/live/cctv11/'},
+    {n:'CCTV-12', t:'社会与法', u:'https://tv.cctv.com/live/cctv12/'},
+    {n:'CCTV-13', t:'新闻',     u:'https://tv.cctv.com/live/cctv13/'},
+    {n:'CCTV-14', t:'少儿',     u:'https://tv.cctv.com/live/cctv14/'},
+    {n:'CCTV-15', t:'音乐',     u:'https://tv.cctv.com/live/cctv15/'},
+    {n:'CCTV-16', t:'奥林匹克', u:'https://tv.cctv.com/live/cctv16/'},
+    {n:'CCTV-17', t:'农业农村', u:'https://tv.cctv.com/live/cctv17/'}
+  ];
+  var ysp = [
+    {n:'央视频', t:'直播+点播', u:'https://www.yangshipin.cn/', ysp:true},
+    {n:'央视新闻', t:'news.cctv', u:'https://news.cctv.com/', ysp:true}
+  ];
+  function build(list, container, cls){
+    for (var i=0;i<list.length;i++){
+      var c=document.createElement('div');
+      c.className='card'+(cls?(' '+cls):'');
+      c.setAttribute('data-url', list[i].u);
+      c.setAttribute('tabindex','0');
+      c.innerHTML='<div class="num">'+list[i].n+'</div><div class="name">'+list[i].t+'</div>';
+      container.appendChild(c);
+    }
+  }
+  build(live, document.getElementById('liveGrid'));
+  build(ysp, document.getElementById('yspGrid'), 'ysp');
+
+  var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
+  var current = 0;
+  function focusCard(i){
+    if(i<0||i>=cards.length) return;
+    cards[current].classList.remove('focused');
+    current=i;
+    cards[current].classList.add('focused');
+    cards[current].focus();
+    cards[current].scrollIntoView({block:'nearest'});
+  }
+  function open(card){ window.location.href = card.getAttribute('data-url'); }
+  window.addEventListener('keydown', function(e){
+    var k=e.key;
+    var r=cards[current].getBoundingClientRect();
+    var cx=r.left+r.width/2, cy=r.top+r.height/2;
+    if(k==='ArrowRight'||k==='ArrowLeft'||k==='ArrowUp'||k==='ArrowDown'){
+      var best=-1, bestDist=1e9;
+      for(var i=0;i<cards.length;i++){
+        if(i===current) continue;
+        var b=cards[i].getBoundingClientRect();
+        var bx=b.left+b.width/2, by=b.top+b.height/2;
+        var dx=bx-cx, dy=by-cy;
+        if(k==='ArrowRight'&&dx<=1) continue;
+        if(k==='ArrowLeft'&&dx>=-1) continue;
+        if(k==='ArrowDown'&&dy<=1) continue;
+        if(k==='ArrowUp'&&dy>=-1) continue;
+        if(k==='ArrowRight'||k==='ArrowLeft'){ if(Math.abs(dy)>b.height) continue; }
+        else { if(Math.abs(dx)>b.width) continue; }
+        var dist=dx*dx+dy*dy;
+        if(dist<bestDist){ bestDist=dist; best=i; }
+      }
+      if(best>=0){ focusCard(best); e.preventDefault(); }
+      return;
+    }
+    if(k==='Enter'||k===' '||k==='Go'){ open(cards[current]); e.preventDefault(); return; }
+    if(k==='Backspace'||k==='Escape'){
+      if(window.location.href.indexOf('index.html')<0){ window.history.back(); }
+      e.preventDefault(); return;
+    }
+  });
+  cards.forEach(function(c,i){
+    c.addEventListener('mouseenter', function(){ focusCard(i); });
+    c.addEventListener('click', function(){ open(c); });
+  });
+  focusCard(0);
+  try { if(window.Android){ window.Android.onLauncherReady(); } } catch(e){}
+</script>
+</body>
+</html>
