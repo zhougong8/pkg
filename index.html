@@ -20,6 +20,10 @@
   .section-title { font-size:17px; color:#c8d0dc; margin:16px 0 8px; font-weight:700;
     display:flex; align-items:center; gap:8px; }
   .section-title .cnt { font-size:12px; color:#6b7484; font-weight:400; }
+  .section-title .ok { font-size:10.5px; color:#2ecc71; border:1px solid #2cc06a;
+    border-radius:3px; padding:0 4px; font-weight:400; }
+  .note { margin-top:14px; padding:7px 10px; font-size:12px; color:#95a0b0; line-height:1.6;
+    background:#141924; border-left:2px solid #3d4a5f; border-radius:4px; max-width:1100px; }
   .grid { display:flex; flex-wrap:wrap; gap:9px; }
   .card {
     width:126px; height:66px; border-radius:9px; position:relative;
@@ -49,7 +53,7 @@
     <div class="hint">方向键选择 · OK/确认 播放 · 返回键 回首页</div>
   </header>
 
-  <div class="section-title">央视频 · 央视 <span class="cnt" id="cnt1"></span></div>
+  <div class="section-title">CCTV 直播 · 央视网 <span class="cnt" id="cnt1"></span><span class="ok">可直接播放</span></div>
   <div class="grid" id="g1"></div>
 
   <div class="section-title">央视频 · 卫视 <span class="cnt" id="cnt2"></span></div>
@@ -61,11 +65,12 @@
   <div class="section-title">央视频 · 特色频道 <span class="cnt" id="cnt4"></span></div>
   <div class="grid" id="g4"></div>
 
-  <div class="section-title">备用入口</div>
+  <div class="section-title">央视频 · 超高清 <span class="cnt" id="cnt5"></span></div>
   <div class="grid" id="g5"></div>
 
+  <div class="note">「CCTV 直播 · 央视网」这组是央视网页面，浏览器里点开就能播。下面央视频几组跳的是央视频官方页面，网页端会提示「请使用央视频客户端观看」，要装央视频 App 才能看。</div>
+
   <footer>
-    频道直接调用央视频官方页面（yangshipin.cn/tv），带 VIP / 限免标记的频道需登录央视频账号。<br>
     节目版权归中央广播电视总台所有，本页仅供个人观看。
   </footer>
 </div>
@@ -73,13 +78,12 @@
   var BASE = 'https://www.yangshipin.cn/tv?pid=';
 
   var cctv = [
-    ['CCTV-1','600001859'], ['CCTV-2','600001800'], ['CCTV-3','600001801'],
-    ['CCTV-4','600001814'], ['CCTV-5','600001818'], ['CCTV-5+','600001817'],
-    ['CCTV-6','600108442'], ['CCTV-7','600004092'], ['CCTV-8','600001803'],
-    ['CCTV-9','600004078'], ['CCTV-10','600001805'], ['CCTV-11','600001806'],
-    ['CCTV-12','600001807'], ['CCTV-13','600001811'], ['CCTV-14','600001809'],
-    ['CCTV-15','600001815'], ['CCTV-16','600098637'], ['CCTV-16 4K','600099502'],
-    ['CCTV-17','600001810'], ['CCTV-4K','600002264'], ['CCTV-8K','600156816']
+    ['CCTV-1','cctv1'], ['CCTV-2','cctv2'], ['CCTV-3','cctv3'],
+    ['CCTV-4','cctv4'], ['CCTV-5','cctv5'], ['CCTV-5+','cctv5plus'],
+    ['CCTV-6','cctv6'], ['CCTV-7','cctv7'], ['CCTV-8','cctv8'],
+    ['CCTV-9','cctvjilu'], ['CCTV-10','cctv10'], ['CCTV-11','cctv11'],
+    ['CCTV-12','cctv12'], ['CCTV-13','cctv13'], ['CCTV-14','cctvchild'],
+    ['CCTV-15','cctv15'], ['CCTV-16','cctv16'], ['CCTV-17','cctv17']
   ];
 
   var weishi = [
@@ -111,8 +115,8 @@
     ['卫生健康','600099651','vip']
   ];
 
-  var extra = [
-    ['央视网直播', 'https://tv.cctv.com/live/']
+  var uhd = [
+    ['CCTV-16 4K','600099502'], ['CCTV-4K','600002264'], ['CCTV-8K','600156816']
   ];
 
   function sizeOf(s){
@@ -154,17 +158,19 @@
   }
 
   var yspLink = function(it){ return BASE + it[1]; };
+  var cctvLink = function(it){ return 'https://tv.cctv.com/live/' + it[1] + '/'; };
 
-  build('g1', cctv, yspLink);
+  build('g1', cctv, cctvLink);
   build('g2', weishi, yspLink);
   build('g3', cgtn, yspLink);
   build('g4', special, yspLink);
-  build('g5', extra, function(it){ return it[1]; });
+  build('g5', uhd, yspLink);
 
   document.getElementById('cnt1').textContent = cctv.length + ' 个频道';
   document.getElementById('cnt2').textContent = weishi.length + ' 个频道';
   document.getElementById('cnt3').textContent = cgtn.length + ' 个频道';
   document.getElementById('cnt4').textContent = special.length + ' 个频道';
+  document.getElementById('cnt5').textContent = uhd.length + ' 个频道';
 
   var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
   var current = 0;
