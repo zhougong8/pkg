@@ -6,139 +6,288 @@
 <title>央视频 TV</title>
 <style>
   * { box-sizing: border-box; margin:0; padding:0; }
-  html,body { height:100%; background:#0b0e14; color:#fff;
+  html { background:#0b0e14; }
+  body { min-height:100vh; background:#0b0e14; color:#fff;
     font-family:"Microsoft YaHei","PingFang SC","Heiti SC",sans-serif; overflow-x:hidden; }
-  #app { padding: 36px 56px 56px; }
+  #app { padding: 22px 36px 40px; }
   header { display:flex; align-items:baseline; justify-content:space-between;
-    margin-bottom:26px; flex-wrap:wrap; }
-  h1 { font-size:46px; font-weight:800; letter-spacing:2px; }
+    margin-bottom:14px; flex-wrap:wrap; gap:8px; }
+  h1 { font-size:26px; font-weight:800; letter-spacing:1px; }
   h1 .accent { color:#e60012; }
-  .hint { font-size:23px; color:#9aa4b2; }
-  .section-title { font-size:29px; color:#c8d0dc; margin:28px 0 14px; font-weight:700; }
-  .grid { display:flex; flex-wrap:wrap; gap:18px; }
+  .badge { display:inline-block; background:#e60012; color:#fff; border-radius:4px;
+    padding:1px 6px; font-size:11px; margin-left:6px; vertical-align:middle; font-weight:400; }
+  .hint { font-size:13px; color:#8b95a5; }
+  .section-title { font-size:17px; color:#c8d0dc; margin:16px 0 8px; font-weight:700;
+    display:flex; align-items:center; gap:8px; }
+  .section-title .cnt { font-size:12px; color:#6b7484; font-weight:400; }
+  .grid { display:flex; flex-wrap:wrap; gap:9px; }
   .card {
-    width:196px; height:118px; border-radius:14px;
+    width:126px; height:66px; border-radius:9px; position:relative;
     background:linear-gradient(135deg,#1b2230,#232c3d);
-    border:2px solid #2c3647; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; cursor:pointer;
-    transition:transform .12s, border-color .12s, background .12s;
+    border:1.5px solid #2c3647; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:transform .1s, border-color .1s, background .1s;
+    padding:0 6px; text-align:center;
   }
-  .card .num { font-size:33px; font-weight:800; }
-  .card .name { font-size:19px; color:#aeb8c7; margin-top:6px; }
-  .card.ysp { background:linear-gradient(135deg,#7a0c14,#b3121f); border-color:#e60012; width:250px; }
-  .card.ysp .name { color:#ffd9dd; }
+  .card .lb { font-weight:700; line-height:1.15; word-break:break-word; }
+  .card.has-tag .lb { padding-right: 14px; }
+  .card .tag { position:absolute; top:-1px; right:-1px; font-size:8.5px; padding:0 3px;
+    border-radius:0 8px 0 5px; font-weight:400; letter-spacing:0; }
+  .tag.vip { background:#f5a623; color:#2b1c00; }
+  .tag.free { background:#2ecc71; color:#04270f; }
   .card:focus, .card.focused {
-    outline:none; border-color:#ffd000; background:linear-gradient(135deg,#2a3650,#37486b);
-    transform:scale(1.08); box-shadow:0 0 0 4px rgba(255,208,0,.35);
+    outline:none; border-color:#ffd000;
+    background:linear-gradient(135deg,#2a3650,#37486b);
+    transform:scale(1.06); box-shadow:0 0 0 3px rgba(255,208,0,.35);
   }
-  .card.ysp:focus, .card.ysp.focused { background:linear-gradient(135deg,#9c1018,#e60012); }
-  footer { margin-top:38px; font-size:19px; color:#6b7484; line-height:1.7; max-width:1100px; }
-  .badge { display:inline-block; background:#e60012; color:#fff; border-radius:6px;
-    padding:2px 9px; font-size:15px; margin-left:8px; vertical-align:middle; }
+  footer { margin-top:22px; font-size:12px; color:#5f6876; line-height:1.6; max-width:1100px; }
 </style>
 </head>
 <body>
 <div id="app">
   <header>
     <h1>央<span class="accent">视频</span> TV <span class="badge">轻量版</span></h1>
-    <div class="hint">方向键选择 · OK/确认 播放 · 返回键 回到首页</div>
+    <div class="hint">方向键选择 · OK/确认 播放 · 返回键 回首页</div>
   </header>
 
-  <div class="section-title">CCTV 直播频道</div>
-  <div class="grid" id="liveGrid"></div>
+  <div class="section-title">央视频 · 央视 <span class="cnt" id="cnt1"></span></div>
+  <div class="grid" id="g1"></div>
 
-  <div class="section-title">央视频 / 新闻</div>
-  <div class="grid" id="yspGrid"></div>
+  <div class="section-title">央视频 · 卫视 <span class="cnt" id="cnt2"></span></div>
+  <div class="grid" id="g2"></div>
+
+  <div class="section-title">央视频 · CGTN <span class="cnt" id="cnt3"></span></div>
+  <div class="grid" id="g3"></div>
+
+  <div class="section-title">央视频 · 特色频道 <span class="cnt" id="cnt4"></span></div>
+  <div class="grid" id="g4"></div>
+
+  <div class="section-title">备用入口</div>
+  <div class="grid" id="g5"></div>
 
   <footer>
-    说明：本页面以官方网页播放器（央视网 / 央视频）封装，节目版权归中央广播电视总台所有，仅供个人观看。<br>
-    可直接用「电视浏览器」(如 TV Bro) 打开本页并设为首页；若老盒子网页无法播放直播（个别老旧 WebView 不支持 HLS），建议安装官方「央视频TV版」App。
+    频道直接调用央视频官方页面（yangshipin.cn/tv），带 VIP / 限免标记的频道需登录央视频账号。<br>
+    节目版权归中央广播电视总台所有，本页仅供个人观看。
   </footer>
 </div>
 <script>
-  var live = [
-    {n:'CCTV-1',  t:'综合',     u:'https://tv.cctv.com/live/cctv1/'},
-    {n:'CCTV-2',  t:'财经',     u:'https://tv.cctv.com/live/cctv2/'},
-    {n:'CCTV-3',  t:'综艺',     u:'https://tv.cctv.com/live/cctv3/'},
-    {n:'CCTV-4',  t:'中文国际', u:'https://tv.cctv.com/live/cctv4/'},
-    {n:'CCTV-5',  t:'体育',     u:'https://tv.cctv.com/live/cctv5/'},
-    {n:'CCTV-5+', t:'体育赛事', u:'https://tv.cctv.com/live/cctv5plus/'},
-    {n:'CCTV-6',  t:'电影',     u:'https://tv.cctv.com/live/cctv6/'},
-    {n:'CCTV-7',  t:'国防军事', u:'https://tv.cctv.com/live/cctv7/'},
-    {n:'CCTV-8',  t:'电视剧',   u:'https://tv.cctv.com/live/cctv8/'},
-    {n:'CCTV-9',  t:'纪录',     u:'https://tv.cctv.com/live/cctv9/'},
-    {n:'CCTV-10', t:'科教',     u:'https://tv.cctv.com/live/cctv10/'},
-    {n:'CCTV-11', t:'戏曲',     u:'https://tv.cctv.com/live/cctv11/'},
-    {n:'CCTV-12', t:'社会与法', u:'https://tv.cctv.com/live/cctv12/'},
-    {n:'CCTV-13', t:'新闻',     u:'https://tv.cctv.com/live/cctv13/'},
-    {n:'CCTV-14', t:'少儿',     u:'https://tv.cctv.com/live/cctv14/'},
-    {n:'CCTV-15', t:'音乐',     u:'https://tv.cctv.com/live/cctv15/'},
-    {n:'CCTV-16', t:'奥林匹克', u:'https://tv.cctv.com/live/cctv16/'},
-    {n:'CCTV-17', t:'农业农村', u:'https://tv.cctv.com/live/cctv17/'}
+  var BASE = 'https://www.yangshipin.cn/tv?pid=';
+
+  var cctv = [
+    ['CCTV-1','600001859'], ['CCTV-2','600001800'], ['CCTV-3','600001801'],
+    ['CCTV-4','600001814'], ['CCTV-5','600001818'], ['CCTV-5+','600001817'],
+    ['CCTV-6','600108442'], ['CCTV-7','600004092'], ['CCTV-8','600001803'],
+    ['CCTV-9','600004078'], ['CCTV-10','600001805'], ['CCTV-11','600001806'],
+    ['CCTV-12','600001807'], ['CCTV-13','600001811'], ['CCTV-14','600001809'],
+    ['CCTV-15','600001815'], ['CCTV-16','600098637'], ['CCTV-16 4K','600099502'],
+    ['CCTV-17','600001810'], ['CCTV-4K','600002264'], ['CCTV-8K','600156816']
   ];
-  var ysp = [
-    {n:'央视频', t:'直播+点播', u:'https://www.yangshipin.cn/', ysp:true},
-    {n:'央视新闻', t:'news.cctv', u:'https://news.cctv.com/', ysp:true}
+
+  var weishi = [
+    ['北京卫视','600002309'], ['江苏卫视','600002521'], ['东方卫视','600002483'],
+    ['浙江卫视','600002520'], ['湖南卫视','600002475'], ['湖北卫视','600002508'],
+    ['广东卫视','600002485'], ['广西卫视','600002509'], ['黑龙江卫视','600002498'],
+    ['海南卫视','600002506'], ['重庆卫视','600002531'], ['深圳卫视','600002481'],
+    ['四川卫视','600002516'], ['河南卫视','600002525'], ['东南卫视','600002484'],
+    ['贵州卫视','600002490'], ['江西卫视','600002503'], ['辽宁卫视','600002505'],
+    ['安徽卫视','600002532'], ['河北卫视','600002493'], ['山东卫视','600002513'],
+    ['天津卫视','600152137'], ['吉林卫视','600190405'], ['陕西卫视','600190400'],
+    ['甘肃卫视','600190408'], ['宁夏卫视','600190737'], ['内蒙古卫视','600190401'],
+    ['云南卫视','600190402'], ['山西卫视','600190407'], ['青海卫视','600190406'],
+    ['西藏卫视','600190403'], ['新疆卫视','600152138'], ['中国教育1台','600171827']
   ];
-  function build(list, container, cls){
-    for (var i=0;i<list.length;i++){
-      var c=document.createElement('div');
-      c.className='card'+(cls?(' '+cls):'');
-      c.setAttribute('data-url', list[i].u);
-      c.setAttribute('tabindex','0');
-      c.innerHTML='<div class="num">'+list[i].n+'</div><div class="name">'+list[i].t+'</div>';
-      container.appendChild(c);
+
+  var cgtn = [
+    ['CGTN','600014550'], ['CGTN 法语','600084704'], ['CGTN 俄语','600084758'],
+    ['CGTN 阿语','600084782'], ['CGTN 西语','600084744'], ['CGTN 纪录','600084781']
+  ];
+
+  var special = [
+    ['风云剧场','600099658','free'], ['第一剧场','600099655','free'],
+    ['怀旧剧场','600099620','free'], ['世界地理','600099637','vip'],
+    ['风云音乐','600099660','vip'], ['兵器科技','600099649','vip'],
+    ['风云足球','600099636','vip'], ['高尔夫·网球','600099659','vip'],
+    ['女性时尚','600099650','vip'], ['文化精品','600099653','vip'],
+    ['台球','600099652','vip'], ['电视指南','600099656','vip'],
+    ['卫生健康','600099651','vip']
+  ];
+
+  var extra = [
+    ['央视网直播', 'https://tv.cctv.com/live/']
+  ];
+
+  function sizeOf(s){
+    var n = s.length;
+    if (n <= 4) return 20;
+    if (n === 5) return 18;
+    if (n === 6) return 15.5;
+    if (n === 7) return 14;
+    if (n === 8) return 12.5;
+    return 11.5;
+  }
+
+  function makeCard(label, url, tag){
+    var c = document.createElement('div');
+    c.className = 'card';
+    c.setAttribute('tabindex','0');
+    c.setAttribute('data-url', url);
+    c.setAttribute('title', label);
+    var s = document.createElement('span');
+    s.className = 'lb';
+    s.textContent = label;
+    s.style.fontSize = sizeOf(label) + 'px';
+    c.appendChild(s);
+    if (tag === 'vip' || tag === 'free'){
+      var t = document.createElement('span');
+      t.className = 'tag ' + (tag === 'vip' ? 'vip' : 'free');
+      t.textContent = tag === 'vip' ? 'VIP' : '限免';
+      c.appendChild(t);
+      c.classList.add('has-tag');
+    }
+    return c;
+  }
+
+  function build(el, list, linkFn){
+    var box = document.getElementById(el);
+    for (var i = 0; i < list.length; i++){
+      box.appendChild(makeCard(list[i][0], linkFn(list[i]), list[i][2]));
     }
   }
-  build(live, document.getElementById('liveGrid'));
-  build(ysp, document.getElementById('yspGrid'), 'ysp');
+
+  var yspLink = function(it){ return BASE + it[1]; };
+
+  build('g1', cctv, yspLink);
+  build('g2', weishi, yspLink);
+  build('g3', cgtn, yspLink);
+  build('g4', special, yspLink);
+  build('g5', extra, function(it){ return it[1]; });
+
+  document.getElementById('cnt1').textContent = cctv.length + ' 个频道';
+  document.getElementById('cnt2').textContent = weishi.length + ' 个频道';
+  document.getElementById('cnt3').textContent = cgtn.length + ' 个频道';
+  document.getElementById('cnt4').textContent = special.length + ' 个频道';
 
   var cards = Array.prototype.slice.call(document.querySelectorAll('.card'));
   var current = 0;
-  function focusCard(i){
-    if(i<0||i>=cards.length) return;
-    cards[current].classList.remove('focused');
-    current=i;
-    cards[current].classList.add('focused');
-    cards[current].focus();
-    cards[current].scrollIntoView({block:'nearest'});
-  }
-  function open(card){ window.location.href = card.getAttribute('data-url'); }
-  window.addEventListener('keydown', function(e){
-    var k=e.key;
-    var r=cards[current].getBoundingClientRect();
-    var cx=r.left+r.width/2, cy=r.top+r.height/2;
-    if(k==='ArrowRight'||k==='ArrowLeft'||k==='ArrowUp'||k==='ArrowDown'){
-      var best=-1, bestDist=1e9;
-      for(var i=0;i<cards.length;i++){
-        if(i===current) continue;
-        var b=cards[i].getBoundingClientRect();
-        var bx=b.left+b.width/2, by=b.top+b.height/2;
-        var dx=bx-cx, dy=by-cy;
-        if(k==='ArrowRight'&&dx<=1) continue;
-        if(k==='ArrowLeft'&&dx>=-1) continue;
-        if(k==='ArrowDown'&&dy<=1) continue;
-        if(k==='ArrowUp'&&dy>=-1) continue;
-        if(k==='ArrowRight'||k==='ArrowLeft'){ if(Math.abs(dy)>b.height) continue; }
-        else { if(Math.abs(dx)>b.width) continue; }
-        var dist=dx*dx+dy*dy;
-        if(dist<bestDist){ bestDist=dist; best=i; }
+  var rows = [];
+
+  function buildRows(){
+    rows = [];
+    cards.forEach(function(c, i){
+      var t = Math.round(c.getBoundingClientRect().top + window.pageYOffset);
+      var row = null;
+      for (var r = 0; r < rows.length; r++){
+        if (Math.abs(rows[r].top - t) < 8){ row = rows[r]; break; }
       }
-      if(best>=0){ focusCard(best); e.preventDefault(); }
+      if (!row){ row = {top: t, idx: []}; rows.push(row); }
+      row.idx.push(i);
+    });
+    rows.sort(function(a, b){ return a.top - b.top; });
+    rows.forEach(function(row){
+      row.idx.sort(function(a, b){
+        return cards[a].getBoundingClientRect().left - cards[b].getBoundingClientRect().left;
+      });
+    });
+  }
+
+  function centerX(i){
+    var r = cards[i].getBoundingClientRect();
+    return r.left + r.width / 2;
+  }
+
+  function locate(i){
+    for (var r = 0; r < rows.length; r++){
+      var k = rows[r].idx.indexOf(i);
+      if (k >= 0) return {r: r, k: k};
+    }
+    return null;
+  }
+
+  function focusCard(i){
+    if (i < 0 || i >= cards.length) return;
+    cards[current].classList.remove('focused');
+    current = i;
+    var c = cards[current];
+    c.classList.add('focused');
+    try { c.focus({preventScroll: true}); } catch (e) { c.focus(); }
+    var rc = c.getBoundingClientRect();
+    if (rc.top < 10 || rc.bottom > window.innerHeight - 10){
+      c.scrollIntoView({block: 'center'});
+    }
+  }
+
+  function open(card){ window.location.href = card.getAttribute('data-url'); }
+
+  function keyName(e){
+    var k = e.key;
+    if (k && k !== 'Unidentified') return k;
+    var c = e.keyCode || e.which;
+    if (c === 37) return 'ArrowLeft';
+    if (c === 38) return 'ArrowUp';
+    if (c === 39) return 'ArrowRight';
+    if (c === 40) return 'ArrowDown';
+    if (c === 13) return 'Enter';
+    if (c === 8)  return 'Backspace';
+    if (c === 27) return 'Escape';
+    if (c === 33) return 'PageUp';
+    if (c === 34) return 'PageDown';
+    return '';
+  }
+
+  window.addEventListener('keydown', function(e){
+    var k = keyName(e);
+    buildRows();
+    var pos = locate(current);
+
+    if (k === 'ArrowRight' || k === 'ArrowLeft'){
+      if (!pos) return;
+      var row = rows[pos.r].idx;
+      var nk = pos.k + (k === 'ArrowRight' ? 1 : -1);
+      if (nk >= 0 && nk < row.length){ focusCard(row[nk]); e.preventDefault(); }
       return;
     }
-    if(k==='Enter'||k===' '||k==='Go'){ open(cards[current]); e.preventDefault(); return; }
-    if(k==='Backspace'||k==='Escape'){
-      if(window.location.href.indexOf('index.html')<0){ window.history.back(); }
-      e.preventDefault(); return;
+
+    if (k === 'ArrowDown' || k === 'ArrowUp'){
+      if (!pos) return;
+      var nr = pos.r + (k === 'ArrowDown' ? 1 : -1);
+      if (nr < 0 || nr >= rows.length){
+        // 已在最上/最下：交给浏览器滚动，别吞掉按键
+        return;
+      }
+      var target = rows[nr].idx, best = target[0], bd = 1e9, cx = centerX(current);
+      for (var i = 0; i < target.length; i++){
+        var d = Math.abs(centerX(target[i]) - cx);
+        if (d < bd){ bd = d; best = target[i]; }
+      }
+      focusCard(best);
+      e.preventDefault();
+      return;
     }
+
+    if (k === 'PageDown' || k === 'PageUp'){
+      window.scrollBy(0, k === 'PageDown' ? window.innerHeight * 0.8 : -window.innerHeight * 0.8);
+      e.preventDefault();
+      return;
+    }
+
+    if (k === 'Home' || k === 'End'){
+      focusCard(k === 'Home' ? 0 : cards.length - 1);
+      e.preventDefault();
+      return;
+    }
+
+    if (k === 'Enter' || k === ' ' || k === 'Go'){ open(cards[current]); e.preventDefault(); return; }
+    if (k === 'Backspace' || k === 'Escape'){ window.history.back(); e.preventDefault(); return; }
   });
-  cards.forEach(function(c,i){
+
+  window.addEventListener('resize', function(){ buildRows(); });
+  buildRows();
+
+  cards.forEach(function(c, i){
     c.addEventListener('mouseenter', function(){ focusCard(i); });
     c.addEventListener('click', function(){ open(c); });
   });
   focusCard(0);
-  try { if(window.Android){ window.Android.onLauncherReady(); } } catch(e){}
+  try { if (window.Android){ window.Android.onLauncherReady(); } } catch(e){}
 </script>
 </body>
 </html>
